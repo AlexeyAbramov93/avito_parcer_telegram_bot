@@ -3,6 +3,7 @@ import requests
 import re
 import time
 import random
+import config
 
 def get_html(url, params=None):
     """ получение кода страницы """
@@ -13,24 +14,30 @@ def get_html(url, params=None):
     html = requests.get(url, headers=headers, params=params)
     return html
 
+def send_telegram(text):
+    requests.get('https://api.telegram.org/bot{}/sendMessage'.format(config.api_token), params=dict(
+        chat_id='@ivanovo_podbor_auto',
+        text=text
+    ))
+
 ######################################################################################################################
 
-url='https://www.avito.ru/ivanovo/avtomobili/inomarki/benzin-ASgBAQICAUTgtg2kijQBQOy2DRTetyg?cd=1&f=ASgBAQECAUTgtg2kijQBQOy2DRTetygDRfgCFnsiZnJvbSI6OTAwLCJ0byI6bnVsbH28FRh7ImZyb20iOjE1Nzg2LCJ0byI6bnVsbH3GmgwXeyJmcm9tIjowLCJ0byI6MTAwMDAwMH0&radius=0&user=1'
-status_code=(get_html(url)).status_code
-reason=(get_html(url)).reason
-print(status_code, reason)
+url='https://www.avito.ru/ivanovo/avtomobili/inomarki/benzin-ASgBAQICAUTgtg2kijQBQOy2DRTetyg?cd=1&f=ASgBAQECAkTyCrCKAeC2DaSKNAFA7LYNFN63KAJF~AIWeyJmcm9tIjo5MDEsInRvIjpudWxsfbwVGHsiZnJvbSI6MTU3ODYsInRvIjpudWxsfQ&geoCoords=57.000348%2C40.973921&radius=100&s=104&user=1'
 
 all_titlesars=[]
 all_prices=[]
 all_publications=[]
 link_list=[] # На основе этого списка определяется объявление уже было добавлено или нет
 
-for i in range(5):
-    print('-----------------------------------------------------------------------')
-    print("ПРОХОД НОМЕР", i)
-    print('-----------------------------------------------------------------------')
-
-    soup = BeautifulSoup((get_html(url)).text, "html.parser")
+a=1
+count=0
+while a==1:
+    count+=1
+    avito_page=get_html(url)
+    soup = BeautifulSoup(avito_page.text, "html.parser")
+    print('-------------------------------------------------------------------------------------------')
+    print('Проход №{} | Ответ сервера: {} {}'.format(count, avito_page.status_code, avito_page.reason))
+    print('-------------------------------------------------------------------------------------------')
 
     # Составляю списки из необходимых заголовков
     # all_titles = soup.find_all('h3', class_=re.compile('title-root'))
@@ -50,18 +57,21 @@ for i in range(5):
         if temp_link not in link_list:
             link_list.append(temp_link)
 
-            time.sleep(random.randint(10, 15)) # Сон на несколько секунд
+            time.sleep(random.randint(15, 25)) # Сон на несколько секунд
             soup_link = BeautifulSoup((get_html(temp_link)).text, "html.parser")
             metadata_views=soup_link.find_all('div', class_=re.compile('title-info-metadata-item title-info-metadata-views'))
             views=int([i for i in (metadata_views[0].text).split()][0])
 
-            if views<1500:
-                print('{}'.format(all_titles[i].get('title')))
-                print(temp_link)
-                print('Количество просмотров: {}   |   {}'.format(views, all_publications[i].text))
-                print()
+            if views<250:
+                # print('{}'.format(all_titles[i].get('title')))
+                # print(temp_link)
+                # print('Количество просмотров: {}   |   {}'.format(views, all_publications[i].text))
+                # print()
+                text=str(all_titles[i].get('title')) + '\n' + str(temp_link) + '\n' 'Просмотров: ' + str(views) + "  (" + str(all_publications[i].text) + ')'
+                send_telegram(text)
 
-    time.sleep(random.randint(20, 30)) # Сон на несколько секунд
+
+    time.sleep(random.randint(100, 150)) # Сон на несколько секунд
 
 ######################################################################################################################
 
