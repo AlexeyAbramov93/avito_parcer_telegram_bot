@@ -1,18 +1,47 @@
 from tortoise import fields
 from tortoise.models import Model
-from tortoise.contrib.pydantic import pydantic_model_creator
+
+from abc import ABC,abstractproperty
 
 
-class AutoURLs(Model):
+# Базовый абстрактный класс, чтобы передать его при описании функции Tortoise ORM
+class AbstractBase(ABC):
+
+    __metaclass__=ABC
+
+    @abstractproperty
+    def id(self):
+        return fields.IntField(pk=True)
+    def link(self):
+        return fields.TextField()
+
+
+# Базовый абстрактный класс, чтобы передать его при описании функции Tortoise ORM
+class URLs(Model):
     id = fields.IntField(pk=True)
     link=fields.TextField()
-    
-    class Meta:
-        table = 'AutoURLs'
-        table_description = 'This table saves unique AutoURLs history'
 
     def __str__(self):
         return self.name
 
-AutoURLs_Pydantic = pydantic_model_creator(AutoURLs, name="AutoURLs")
 
+# Наследуемая модель для хранения ссылок на авто
+class AutoURLs(URLs):
+   
+    class Meta:
+        table = 'AutoURLs'
+        table_description = 'This table saves unique AutoURLs history'
+
+
+# Наследуемая модель для хранения ссылок на квартиры
+class FlatURLs(URLs):
+    
+    class Meta:
+        table = 'FlatURLs'
+        table_description = 'This table saves unique FlatURLs history'
+
+
+
+
+
+        
