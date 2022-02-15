@@ -55,12 +55,16 @@ async def work(link, all_titles, all_publications):
     if not await get_all_from_DB(link):
         await add_to_DB(link)
 
-        time.sleep(random.randint(5, 10)) # Сон на несколько секунд
+        time.sleep(random.randint(20, 30)) # Сон на несколько секунд
         soup_link = BeautifulSoup((get_html(temp_link)).text, "html.parser")
         metadata_views=soup_link.find_all('div', class_=re.compile('title-info-metadata-item title-info-metadata-views'))
-        views=int([i for i in (metadata_views[0].text).split()][0])
+        try:
+            views=int([i for i in (metadata_views[0].text).split()][0])
+        except Exception as ex:
+            views=0
+            print(ex)
 
-        if views<250:
+        if views<500:
             text=str(all_titles[i].get('title')) + '\n' + str(temp_link) + '\n' 'Просмотров: ' + str(views) + "  (" + str(all_publications[i].text) + ')'
             send_telegram(text)   
 
@@ -75,9 +79,7 @@ while a==1:
     count+=1
     avito_page=get_html(avito_url.url)
     soup = BeautifulSoup(avito_page.text, "html.parser")
-    print('-------------------------------------------------------------------------------------------')
-    print('Проход №{} | Ответ сервера: {} {}'.format(count, avito_page.status_code, avito_page.reason))
-    print('-------------------------------------------------------------------------------------------')
+
 
     # Составляю списки из необходимых заголовков
     all_titles = soup.find_all('a', class_=re.compile('link-link-MbQDP link-design-default-_nSbv title-root-zZCwT iva-item-title-py3i_ title-listRedesign-_rejR title-root_maxHeight-X6PsH'))
@@ -90,7 +92,11 @@ while a==1:
 
         run_async(work(temp_link,all_titles,all_publications))
     
-    time.sleep(random.randint(120, 180)) # Сон на несколько секунд
+    print('-------------------------------------------------------------------------------------------')
+    print('Проход №{} | Ответ сервера: {} {}'.format(count, avito_page.status_code, avito_page.reason))
+    print('-------------------------------------------------------------------------------------------')
+
+    time.sleep(random.randint(60*4, 60*7)) # Сон на несколько минут
 
 ######################################################################################################################
 
