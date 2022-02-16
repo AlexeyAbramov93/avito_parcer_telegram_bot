@@ -7,3 +7,12 @@ url_search_auto='https://www.avito.ru/ivanovo/avtomobili/inomarki/benzin-ASgBAQI
 title_auto = 'link-link-MbQDP link-design-default-_nSbv title-root-zZCwT iva-item-title-py3i_ title-listRedesign-_rejR title-root_maxHeight-X6PsH'
 publication_auto = 'date-text'
 view_auto = 'title-info-metadata-item title-info-metadata-views'
+
+# Ссылка на поиск авито: Квартиры ()
+url_search_flat='https://www.avito.ru/ivanovo/kvartiry/prodam-ASgBAgICAUSSA8YQ?cd=1&f=ASgBAQICAUSSA8YQBEDkByT~UfhRyggkglmEWeYWFOb8Aay~DRSkxzU'
+
+# Классы необходимых заголовков
+title_flat = 'link-link-MbQDP link-design-default-_nSbv title-root-zZCwT iva-item-title-py3i_ title-listRedesign-_rejR title-root_maxHeight-X6PsH'
+publication_flat = 'date-text'
+view_flat = 'title-info-metadata-item title-info-metadata-views'
+

@@ -4,7 +4,7 @@ from tortoise.models import Model
 from abc import ABC,abstractproperty
 
 
-# Базовый абстрактный класс, чтобы передать его при описании функции Tortoise ORM
+# Абстрактный класс, для объявления функций Tortoise ORM (add_to_DB и get_all_from_DB)
 class AbstractBase(ABC):
 
     __metaclass__=ABC
@@ -16,7 +16,7 @@ class AbstractBase(ABC):
         return fields.TextField()
 
 
-# Базовый абстрактный класс, чтобы передать его при описании функции Tortoise ORM
+# Базовый класс
 class URLs(Model):
     id = fields.IntField(pk=True)
     link=fields.TextField()
