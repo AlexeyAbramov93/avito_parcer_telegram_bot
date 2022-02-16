@@ -5,7 +5,7 @@ import config_avito
 
 from models import AutoURLs, FlatURLs
 from tortoise import run_async
-from work import work
+from work import work, work_cian
 
 from send_telegram import send_telegram
 
@@ -18,7 +18,6 @@ a=1
 while a==1:
     cycle+=1
     try:
-        send_telegram(config_telegram.api_token_bot, config_telegram.chat_id_exceptions, cycle)   
 
         run_async(work(
                         config_avito.url_search_auto, 
@@ -35,6 +34,15 @@ while a==1:
                         config_telegram.api_token_bot, config_telegram.chat_id_flatchannel,
                         cycle
         ))
+
+        run_async(work_cian(
+                        config_avito.url_search_flat_cian, 
+                        config_avito.title_flat_cian,
+                        FlatURLs,
+                        config_telegram.api_token_bot, config_telegram.chat_id_flatchannel,
+                        cycle
+        ))
+        
     except Exception as ex:
         send_telegram(config_telegram.api_token_bot, config_telegram.chat_id_exceptions,ex)   
 
