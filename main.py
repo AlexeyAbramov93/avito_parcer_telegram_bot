@@ -3,7 +3,7 @@ import tortoise_methods
 import config_telegram
 import config_avito
 
-from models import AutoURLs, FlatURLs
+from models import AutoURLs, FlatAvitoURLs, FlatCianURLs
 from tortoise import run_async
 from work import work, work_cian
 
@@ -30,7 +30,7 @@ while a==1:
         run_async(work(
                         config_avito.url_search_flat, 
                         config_avito.title_flat, config_avito.publication_flat, config_avito.view_flat,
-                        FlatURLs,
+                        FlatAvitoURLs,
                         config_telegram.api_token_bot, config_telegram.chat_id_flatchannel,
                         cycle
         ))
@@ -38,11 +38,11 @@ while a==1:
         run_async(work_cian(
                         config_avito.url_search_flat_cian, 
                         config_avito.title_flat_cian,
-                        FlatURLs,
+                        FlatCianURLs,
                         config_telegram.api_token_bot, config_telegram.chat_id_flatchannel,
                         cycle
         ))
-        
+
     except Exception as ex:
         send_telegram(config_telegram.api_token_bot, config_telegram.chat_id_exceptions,ex)   
 

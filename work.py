@@ -9,6 +9,7 @@ import send_telegram
 from get_html import get_html
 from send_telegram import send_telegram
 
+import urllib
 
 async def work(url_search_auto, title_auto, publication_auto, view_auto, modelURLs, api_token_bot, chat_id, cycle):
 
@@ -26,11 +27,24 @@ async def work(url_search_auto, title_auto, publication_auto, view_auto, modelUR
     # Обрабатываю списки поэлементно и забираю нужные данные
     for i in range(len(all_titles)):
         tmp_link='https://www.avito.ru'+str(all_titles[i].get('href'))
-
+        
         if not await tortoise_methods.get_all_from_DB(modelURLs, tmp_link):
+
+            # website=urllib.parse.urlsplit(url_search_auto).netloc
+            
+            # avito_section='avtomobili'
+            # if 'kvartiry' in url_search_auto:
+            #     print('kvartiry')
+ 
+            # section = {
+            #         'www.avito.ru' : avito_section
+            #         'www.auto.ru' : 'avtomobili',
+            #         'ivanovo.cian.ru' : 'kvartiry'
+            # }
+
             await tortoise_methods.add_to_DB(modelURLs, tmp_link)
 
-            time.sleep(random.randint(10, 15)) # Сон на несколько секунд между перебором новых объявлений
+            time.sleep(random.randint(5, 15)) # Сон на несколько секунд между перебором новых объявлений
             soup_link = BeautifulSoup((get_html(tmp_link)).text, "html.parser")
             metadata_views=soup_link.find_all('div', class_=re.compile(view_auto))
             try:
@@ -45,7 +59,7 @@ async def work(url_search_auto, title_auto, publication_auto, view_auto, modelUR
 
         #print('{} из {}'.format(i+1, len(all_titles)))
 
-    time.sleep(random.randint(30, 40)) # Сон на несколько минут
+    time.sleep(random.randint(60, 100)) # Сон на несколько минут
 
 
 async def work_cian(url_search_auto, title_auto, modelURLs, api_token_bot, chat_id, cycle):
@@ -68,7 +82,7 @@ async def work_cian(url_search_auto, title_auto, modelURLs, api_token_bot, chat_
         if not await tortoise_methods.get_all_from_DB(modelURLs, tmp_link):
             await tortoise_methods.add_to_DB(modelURLs, tmp_link)
 
-            time.sleep(5) # Сон на несколько секунд между перебором новых объявлений
+            time.sleep(1) # Сон на несколько секунд между перебором новых объявлений
             # soup_link = BeautifulSoup((get_html(tmp_link)).text, "html.parser")
             # metadata_views=soup_link.find_all('div', class_=re.compile(view_auto))
             # try:
@@ -83,4 +97,4 @@ async def work_cian(url_search_auto, title_auto, modelURLs, api_token_bot, chat_
 
         #print('{} из {}'.format(i+1, len(all_titles)))
 
-    time.sleep(random.randint(30, 40)) # Сон на несколько минут
+    time.sleep(random.randint(60, 100)) # Сон на несколько минут
