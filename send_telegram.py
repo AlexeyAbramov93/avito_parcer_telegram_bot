@@ -8,4 +8,3 @@ def send_telegram(api_token, chat_id, text):
         ))
     except Exception as ex:
         print(ex)
-
