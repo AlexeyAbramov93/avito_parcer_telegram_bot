@@ -5,25 +5,28 @@ from selenium.webdriver.common.by import By
 
 import time
 
-def get_html(url, params=None):
+def get_urls(url, params=None):
 
     options = Options()
     options.add_argument("--disable-extensions")
-
     driver = webdriver.Chrome(executable_path="C:/chromedriver_win32/chromedriver.exe/", options=options )
-
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(60)
 
     try:
-        driver.get('https://www.avito.ru/ivanovo/avtomobili?cd=1&radius=200')
-        # print(f'Title: "{driver}"')
-        # page_source = driver.find_element(By.TAG_NAME, "body").text
+        driver.get(url)
+        # driver.get('https://auto.ru/ivanovo/cars/bmw/all/')
 
         page_source = driver.find_elements(By.CLASS_NAME, "iva-item-sliderLink-uLz1v")
+        # page_source = driver.find_elements(By.CLASS_NAME, "Link OfferThumb")
+        
+        urls_list = []
         for i in page_source:
-            print(i.get_attribute('href'))
-
+            urls_list.append(i.get_attribute('href'))
+            # print(i.get_attribute('href'))
 
     finally:
         driver.quit()
         print('finally')
+        return urls_list
+
+
