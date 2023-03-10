@@ -1,1 +1,0 @@
-url='https://www.avito.ru/ivanovo/avtomobili/inomarki/benzin-ASgBAQICAUTgtg2kijQBQOy2DRTetyg?cd=1&f=ASgBAQECAkTyCrCKAeC2DaSKNAFA7LYNFN63KARF~AIWeyJmcm9tIjo5MDAsInRvIjpudWxsfbwVGHsiZnJvbSI6MTU3ODYsInRvIjpudWxsfb4VGHsiZnJvbSI6bnVsbCwidG8iOjE1NTQwfcaaDBd7ImZyb20iOjAsInRvIjoxMDAwMDAwfQ&radius=100&s=104&user=1'

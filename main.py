@@ -1,102 +1,206 @@
-from bs4 import BeautifulSoup
-import requests
-import re
 import time
 import random
-import config
-import avito_url
 
-####################################################################################################################################
+import tortoise_methods
+import config_telegram
+import config_avito
 
-def get_html(url, params=None):
-    """ получение кода страницы """
-    headers = {
-        "Accept": "*/*",
-        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36"
-    }
-    html = requests.get(url, headers=headers, params=params)
-    return html
+from models import Advertisement#, Section, Website
 
-####################################################################################################################################
-from models import AutoURLs,AutoURLs_Pydantic
-from tortoise import Tortoise, run_async
+from tortoise import run_async
+from work import work
 
-async def init():
-    await Tortoise.init(db_url='sqlite://sql_app.db', modules={'models': ['__main__']})
-    await Tortoise.generate_schemas(safe=True)
+from send_telegram import send_telegram
 
 if __name__ == '__main__':
-    run_async(init()) # run_async по выполнению всех операций init() завершает автоматически соединение с БД
+    # Создание БД
+    run_async(tortoise_methods.init()) # run_async по выполнению всех операций init() завершает автоматически соединение с БД
 
-# Для нового обращения к базе данных надо заново создавать новое подключение
-# На данный момент получилось только так:
-# await Tortoise.init(db_url='sqlite://sql_app.db', modules={'models': ['__main__']})
-
-async def add_to_DB(link):
-    await Tortoise.init(db_url='sqlite://sql_app.db', modules={'models': ['__main__']})
-    await AutoURLs.create(link=link)
-
-async def get_all_from_DB(link):
-    await Tortoise.init(db_url='sqlite://sql_app.db', modules={'models': ['__main__']})
-    return await AutoURLs.filter(link=link).count()
-
-####################################################################################################################################
-
-def send_telegram(text):
-    requests.get('https://api.telegram.org/bot{}/sendMessage'.format(config.api_token), params=dict(
-        chat_id='@ivanovo_podbor_auto',
-        text=text
+cycle=0
+a=1
+while a==1:
+    cycle+=1
+    
+    run_async(work(
+                    config_avito.url_search_auto_at, 
+                    config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+                    Advertisement,
+                    config_telegram.api_token_bot, config_telegram.chat_id_autochannel_at,
+                    cycle
     ))
 
-######################################################################################################################
+    run_async(work(
+                    config_avito.url_search_auto_mt, 
+                    config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+                    Advertisement,
+                    config_telegram.api_token_bot, config_telegram.chat_id_autochannel_mt,
+                    cycle
+    ))
 
-async def work(link, all_titles, all_publications):
+    # run_async(work(
+    #                 config_avito.url_search_noutbuki, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_notechannel,
+    #                 cycle
+    # ))
 
-    if not await get_all_from_DB(link):
-        await add_to_DB(link)
+    # run_async(work(
+    #                 config_avito.url_search_velo, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_velochannel,
+    #                 cycle
+    # ))
 
-        time.sleep(random.randint(20, 30)) # Сон на несколько секунд
-        soup_link = BeautifulSoup((get_html(temp_link)).text, "html.parser")
-        metadata_views=soup_link.find_all('div', class_=re.compile('title-info-metadata-item title-info-metadata-views'))
-        try:
-            views=int([i for i in (metadata_views[0].text).split()][0])
-        except Exception as ex:
-            views=0
-            print(ex)
+    # run_async(work(
+    #                 config_avito.url_search_kolesa_R15, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_kolesa,
+    #                 cycle
+    # ))
 
-        if views<500:
-            text=str(all_titles[i].get('title')) + '\n' + str(temp_link) + '\n' 'Просмотров: ' + str(views) + "  (" + str(all_publications[i].text) + ')'
-            send_telegram(text)   
+    # run_async(work(
+    #                 config_avito.url_search_kolesa_R16, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_kolesa,
+    #                 cycle
+    # ))
 
-######################################################################################################################
+    # run_async(work(
+    #                 config_avito.url_search_shiny_R15, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_kolesa,
+    #                 cycle
+    # ))
 
-all_titlesars=[]
-all_publications=[]
+    # run_async(work(
+    #                 config_avito.url_search_shiny_R16, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_kolesa,
+    #                 cycle
+    # ))
 
-a=1
-count=0
-while a==1:
-    count+=1
-    avito_page=get_html(avito_url.url)
-    soup = BeautifulSoup(avito_page.text, "html.parser")
+    # run_async(work(
+    #                 config_avito.url_search_shiny_R17, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_kolesa,
+    #                 cycle
+    # ))
 
+    # run_async(work(
+    #                 config_avito.url_search_shiny_R18, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_kolesa,
+    #                 cycle
+    # ))
 
-    # Составляю списки из необходимых заголовков
-    all_titles = soup.find_all('a', class_=re.compile('link-link-MbQDP link-design-default-_nSbv title-root-zZCwT iva-item-title-py3i_ title-listRedesign-_rejR title-root_maxHeight-X6PsH'))
-    all_publications = soup.find_all('div', class_=re.compile('date-text'))
-
-    # Обрабатываю списки поэлементно и забираю нужные данные
-    for i in range(len(all_titles)):
-        print(i+1, 'from', len(all_titles))
-        temp_link='https://www.avito.ru'+str(all_titles[i].get('href'))
-
-        run_async(work(temp_link,all_titles,all_publications))
+    run_async(work(
+                    config_avito.url_search_zapchasti_getz, 
+                    config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+                    Advertisement,
+                    config_telegram.api_token_bot, config_telegram.chat_id_avtosvet,
+                    cycle
+    ))
     
-    print('-------------------------------------------------------------------------------------------')
-    print('Проход №{} | Ответ сервера: {} {}'.format(count, avito_page.status_code, avito_page.reason))
-    print('-------------------------------------------------------------------------------------------')
+    # run_async(work(
+    #                 config_avito.url_search_flat_cian, 
+    #                 config_avito.title_flat_cian, config_avito.price_cian, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_flatchannel,
+    #                 cycle
+    # ))
 
-    time.sleep(random.randint(60*4, 60*7)) # Сон на несколько минут
+    # run_async(work(
+    #                 config_avito.url_search_flat_cian_rent, 
+    #                 config_avito.title_flat_cian, config_avito.price_cian, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_flatchannel_rent,
+    #                 cycle
+    # ))
 
-######################################################################################################################
+    # run_async(work(
+    #                 config_avito.url_search_flat, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_flatchannel,
+    #                 cycle
+    # ))
+
+    # run_async(work(
+    #                 config_avito.url_search_flat_rent, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_flatchannel_rent,
+    #                 cycle
+    # ))
+
+
+
+
+    run_async(work(
+                    config_avito.url_search_zapchasti_ceed, 
+                    config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+                    Advertisement,
+                    config_telegram.api_token_bot, config_telegram.chat_id_zapchasti_ceed,
+                    cycle
+    ))
+
+    run_async(work(
+                    config_avito.url_search_zapchasti_ceed_rest, 
+                    config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+                    Advertisement,
+                    config_telegram.api_token_bot, config_telegram.chat_id_zapchasti_ceed,
+                    cycle
+    ))
+
+    # run_async(work(
+    #                 config_avito.url_search_PK, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_PK,
+    #                 cycle
+    # ))
+
+    # run_async(work(
+    #                 config_avito.url_search_PK2, 
+    #                 config_avito.title_avito, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    #                 Advertisement,
+    #                 config_telegram.api_token_bot, config_telegram.chat_id_PK,
+    #                 cycle
+    # ))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # # # AUTO.RU
+    # # run_async(work(
+    # #                 config_avito.url_search_auto2, 
+    # #                 config_avito.title_auto_ru, config_avito.price_avito, config_avito.publication_avito, config_avito.view_avito,
+    # #                 Advertisement,
+    # #                 config_telegram.api_token_bot, config_telegram.chat_id_auto_cx5,
+    # #                 cycle
+    # # ))
+    
 
